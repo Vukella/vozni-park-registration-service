@@ -16,6 +16,9 @@
        ["/api/verify"
         {:get {:handler handlers/verify-token}}]
 
+       ["/api/request-otp"
+        {:post {:handler handlers/request-otp}}]
+
        ["/api/complete"
         {:post {:handler handlers/complete-registration}}]])
 

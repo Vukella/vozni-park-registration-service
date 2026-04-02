@@ -8,6 +8,9 @@
 (defn generate-registration-token []
   (str (UUID/randomUUID)))
 
+(defn generate-otp []
+  (format "%06d" (rand-int 1000000)))
+
 (defn hash-password [password]
   (BCrypt/hashpw password (BCrypt/gensalt 10)))
 

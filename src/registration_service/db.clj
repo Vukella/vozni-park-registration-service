@@ -68,3 +68,27 @@
                                       ["SELECT COUNT(*) AS cnt FROM app_user WHERE USERNAME = ?" username]
                                       query-opts)]
            (> (:cnt result) 0)))
+;; OTP Queries
+
+(defn save-otp! [email code expires-at]
+  (jdbc/execute-one! (get-datasource)
+                     ["INSERT INTO otp_codes (EMAIL, CODE, EXPIRES_AT)
+                       VALUES (?, ?, ?)"
+                      email code expires-at]
+                     query-opts))
+
+(defn find-valid-otp [email code]
+  (jdbc/execute-one! (get-datasource)
+                     ["SELECT * FROM otp_codes
+                       WHERE EMAIL = ? AND CODE = ? AND USED = 0
+                       AND EXPIRES_AT > UTC_TIMESTAMP()
+                       ORDER BY CREATED_AT DESC LIMIT 1"
+                      email code]
+                     query-opts))
+
+(defn mark-otp-used! [email code]
+  (jdbc/execute! (get-datasource)
+                 ["UPDATE otp_codes SET USED = 1
+                   WHERE EMAIL = ? AND CODE = ?"
+                  email code]
+                 query-opts))
