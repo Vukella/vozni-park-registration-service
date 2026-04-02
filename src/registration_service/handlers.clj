@@ -1,55 +1,78 @@
 (ns registration-service.handlers
-  (:require [clojure.tools.logging :as log]))
+    (:require [clojure.tools.logging :as log]
+      [registration-service.db :as db]
+      [registration-service.auth :as auth]
+      [registration-service.mail :as mail]) (:import (com.sun.org.apache.bcel.internal.generic Select)))
 
-(defn health-check
-  "Health check endpoint — confirms service is running."
-  [_request]
-  {:status 200
-   :body {:status "UP"
-          :service "registration-service"
-          :version "0.1.0"}})
-
-(defn register-request
-  "POST /api/register — Accepts email, checks ZAPOSLENI table,
-   sends registration link if employee exists.
-   TODO: Implement DB check, token generation, email sending."
-  [request]
-  (let [email (get-in request [:body :email])]
-    (log/info (str "Registration request received for: " email))
-    (if (and email (not (empty? email)))
-      ;; Placeholder — always returns success message
-      ;; In production: check ZAPOSLENI table, generate token, send email
+(defn health-check [_request]
       {:status 200
-       :body {:message "If this email is registered in our system, you will receive a registration link."}}
-      {:status 400
-       :body {:error "Email is required."}})))
+       :body {:status "UP"
+              :service "registration-service"
+              :version "0.1.0"}})
 
-(defn verify-token
-  "GET /api/verify?token=... — Validates the registration token.
-   TODO: Implement token lookup and expiration check."
-  [request]
-  (let [token (get-in request [:query-params "token"])]
-    (log/info (str "Token verification request: " (when token (subs token 0 (min 8 (count token)))) "..."))
-    (if token
-      ;; Placeholder — returns confirmation page data
-      {:status 200
-       :body {:message "Token is valid. Please complete your registration."
-              :token token}}
-      {:status 400
-       :body {:error "Token parameter is required."}})))
+(defn register-request [request]
+      (let [email (get-in request [:body :email])]
+           (if (or (nil? email) (empty? email))
+             {:status 400 :body {:error "Email is required."}}
+             (do
+               (let [employee (db/find-employee-by-email email)]
+                    (when employee
+                          (let [token        (auth/generate-registration-token)
+                                zaposleni-id (:id_zaposleni employee)
+                                expires-at   (java.sql.Timestamp.
+                                               (+ (System/currentTimeMillis)
+                                                  (* 2 60 60 1000)))]
+                               (println "SAVING TOKEN:" token)
+                               (println "ZAPOSLENI-ID:" zaposleni-id)
+                               (println "EXPIRES-AT:" expires-at)
+                               (db/save-registration-token! token email zaposleni-id expires-at)
+                               (mail/send-registration-email email (:full_name employee) token))))
+               {:status 200
+                :body {:message "If this email is registered in our system, you will receive a registration link."}}))))
 
-(defn complete-registration
-  "POST /api/complete — Creates user account with username and password.
-   TODO: Implement user creation in APP_USER table with BCrypt hash."
-  [request]
-  (let [{:keys [token username password]} (:body request)]
-    (log/info (str "Registration completion for username: " username))
-    (cond
-      (nil? token)    {:status 400 :body {:error "Token is required."}}
-      (nil? username) {:status 400 :body {:error "Username is required."}}
-      (nil? password) {:status 400 :body {:error "Password is required."}}
-      :else
-      ;; Placeholder — returns success
-      {:status 201
-       :body {:message "User account created successfully."
-              :username username}})))
+(defn verify-token [request]
+      (let [token (get-in request [:query-params "token"])]
+           (println "VERIFYING TOKEN:" token)
+           (let [record (db/find-valid-token token)]
+                (println "DB RECORD:" record)
+                (if record
+                  {:status 200
+                   :body {:valid true :email (:email record) :message "Token is valid."}}
+                  {:status 400
+                   :body {:valid false :error "Token is invalid or has expired."}}))))
+
+(defn complete-registration [request]
+      (let [{:keys [token username password]} (:body request)]
+           (cond
+             (nil? token)
+             {:status 400 :body {:error "Token is required."}}
+
+             (nil? username)
+             {:status 400 :body {:error "Username is required."}}
+
+             (nil? password)
+             {:status 400 :body {:error "Password is required."}}
+
+             (< (count password) 8)
+             {:status 400 :body {:error "Password must be at least 8 characters."}}
+
+             :else
+             (let [record (db/find-valid-token token)]
+                  (cond
+                    (nil? record)
+                    {:status 400 :body {:error "Token is invalid or has expired."}}
+
+                    (db/username-exists? username)
+                    {:status 409 :body {:error "Username is already taken."}}
+
+                    :else
+                    (let [zaposleni-id  (:zaposleni_id record)
+                          employee      (db/find-employee-by-zaposleni-id zaposleni-id)
+                          full-name     (:full_name employee)
+                          password-hash (auth/hash-password password)]
+                         (db/create-user! username full-name password-hash 2 zaposleni-id)
+                         (db/mark-token-used! token)
+                         (log/info (str "User account created: " username))
+                         {:status 201
+                          :body {:message  "Account created successfully. You can now log in."
+                                 :username username}}))))))

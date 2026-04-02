@@ -29,4 +29,6 @@
                    :content html-body}]})
       (log/info (str "Registration email sent successfully to: " to-email))
       (catch Exception e
+        (println "EMAIL ERROR:" (.getMessage e))
+        (println "Cause:" (.getCause e))
         (log/error (str "Failed to send email to " to-email ": " (.getMessage e)))))))

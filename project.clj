@@ -18,6 +18,7 @@
                  [buddy/buddy-sign "3.6.1-359"]
                  [buddy/buddy-auth "3.0.323"]
                  [buddy/buddy-hashers "2.0.167"]
+                 [org.mindrot/jbcrypt "0.4"]
 
                  ;; Database
                  [com.github.seancorfield/next.jdbc "1.3.939"]

@@ -8,14 +8,16 @@
    (or (System/getenv key) default)))
 
 (def db-config
-  "Database configuration — reads from environment variables.
-   Matches the same env vars used by the Spring Boot backend."
-  {:dbtype   "mysql"
-   :host     (get-env "DB_HOST" "localhost")
-   :port     (Integer/parseInt (get-env "DB_PORT" "3307"))
-   :dbname   (get-env "DB_NAME" "vozni_park")
-   :user     (get-env "DB_USERNAME" "root")
-   :password (get-env "DB_PASSWORD" "")})
+  {:jdbcUrl (str "jdbc:mysql://"
+                 (get-env "DB_HOST" "localhost")
+                 ":"
+                 (get-env "DB_PORT" "3306")
+                 "/"
+                 (get-env "DB_NAME" "vozni_park_db")
+                 "?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false")
+   :username (get-env "DB_USERNAME" "root")
+   :password (get-env "DB_PASSWORD" "")
+   :maximum-pool-size 5})
 
 (def jwt-config
   "JWT configuration for token signing."
