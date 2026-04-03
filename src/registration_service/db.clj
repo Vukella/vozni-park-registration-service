@@ -68,6 +68,7 @@
                                       ["SELECT COUNT(*) AS cnt FROM app_user WHERE USERNAME = ?" username]
                                       query-opts)]
            (> (:cnt result) 0)))
+
 ;; OTP Queries
 
 (defn save-otp! [email code expires-at]
