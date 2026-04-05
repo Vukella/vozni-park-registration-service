@@ -36,32 +36,11 @@
         {:status 400
          :body {:valid false :error "Token is invalid or has expired."}}))))
 
-(defn request-otp [request]
-  (let [token (get-in request [:body :token])]
-    (if (or (nil? token) (empty? token))
-      {:status 400 :body {:error "Token is required."}}
-      (let [record (db/find-valid-token token)]
-        (if (nil? record)
-          {:status 400 :body {:error "Token is invalid or has expired."}}
-          (let [email      (:email record)
-                code       (auth/generate-otp)
-                expires-at (java.sql.Timestamp.
-                             (+ (System/currentTimeMillis)
-                                (* 5 60 1000)))]
-            (db/save-otp! email code expires-at)
-            (mail/send-otp-email email code)
-            (log/info (str "OTP sent to: " email))
-            {:status 200
-             :body {:message "A verification code has been sent to your email. It expires in 5 minutes."}}))))))
-
 (defn complete-registration [request]
-  (let [{:keys [token otp username password]} (:body request)]
+  (let [{:keys [token username password]} (:body request)]
     (cond
       (nil? token)
       {:status 400 :body {:error "Token is required."}}
-
-      (nil? otp)
-      {:status 400 :body {:error "Verification code is required."}}
 
       (nil? username)
       {:status 400 :body {:error "Username is required."}}
@@ -76,10 +55,7 @@
       (let [record (db/find-valid-token token)]
         (cond
           (nil? record)
-          {:status 400 :body {:error "Token is invalid or has expired."}}
-
-          (nil? (db/find-valid-otp (:email record) otp))
-          {:status 400 :body {:error "Verification code is invalid or has expired."}}
+          {:status 410 :body {:error "Token is invalid or has expired."}}
 
           (db/username-exists? username)
           {:status 409 :body {:error "Username is already taken."}}
@@ -91,7 +67,6 @@
                 password-hash (auth/hash-password password)]
             (db/create-user! username full-name password-hash 2 zaposleni-id)
             (db/mark-token-used! token)
-            (db/mark-otp-used! (:email record) otp)
             (log/info (str "User account created: " username))
             {:status 201
              :body {:message  "Account created successfully. You can now log in."
