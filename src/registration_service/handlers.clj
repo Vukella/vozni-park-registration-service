@@ -29,12 +29,14 @@
 
 (defn verify-token [request]
   (let [token (get-in request [:query-params "token"])]
-    (let [record (db/find-valid-token token)]
-      (if record
-        {:status 200
-         :body {:valid true :email (:email record) :message "Token is valid."}}
-        {:status 400
-         :body {:valid false :error "Token is invalid or has expired."}}))))
+    (if (nil? token)
+      {:status 400 :body {:error "Token parameter is required."}}
+      (let [record (db/find-valid-token token)]
+        (if record
+          {:status 200
+           :body {:valid true :email (:email record) :message "Token is valid."}}
+          {:status 400
+           :body {:valid false :error "Token is invalid or has expired."}})))))
 
 (defn complete-registration [request]
   (let [{:keys [token username password]} (:body request)]
