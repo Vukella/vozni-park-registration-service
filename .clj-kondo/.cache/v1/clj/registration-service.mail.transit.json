@@ -1,1 +1,0 @@
-["^ ","~$send-registration-email",["^ ","~:row",7,"~:col",1,"~:fixed-arities",["~#set",[3]],"~:name","^0","~:ns","~$registration-service.mail","~:top-ns","^7","~:type","~:fn"],"~:filename","C:/Users/neman/Documents/Master/Master rad/vozni-park/vozni-park-registration-service/src/registration_service/mail.clj"]

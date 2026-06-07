@@ -3,6 +3,7 @@
   :url "https://github.com/Vukella/vozni-park-registration-service"
   :license {:name "MIT"}
 
+  :plugins [[lein-midje "3.2.2"]]
   :dependencies [[org.clojure/clojure "1.12.0"]
 
                  ;; HTTP Server
@@ -32,7 +33,6 @@
                  [selmer "1.12.61"]
 
                  ;; Logging
-                 [ch.qos.logback/logback-classic "1.4.14"]
                  [org.clojure/tools.logging "1.3.0"]
 
                  ;; JSON
@@ -41,7 +41,9 @@
   :main ^:skip-aot registration-service.core
   :target-path "target/%s"
 
-  :profiles {:dev {:resource-paths ["resources" "dev-resources"]}
+  :profiles {:dev {:resource-paths ["resources" "dev-resources"]
+                   :dependencies   [[midje "1.10.10"]
+                                    [ch.qos.logback/logback-classic "1.4.14"]]}
 
              :uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})

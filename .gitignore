@@ -10,3 +10,8 @@ pom.xml.asc
 /.nrepl-port
 /.cpcache
 .hg
+.idea/
+*.iml
+.clj-kondo/.cache/
+.clj-kondo/imports/
+/target/
