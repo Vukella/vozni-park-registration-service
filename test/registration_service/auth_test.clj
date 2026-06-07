@@ -2,9 +2,7 @@
   (:require [midje.sweet :refer :all]
             [registration-service.auth :as auth]))
 
-;; ============================================================
 ;; generate-registration-token
-;; ============================================================
 
 (facts "about generate-registration-token"
 
@@ -23,9 +21,7 @@
                    t2 (auth/generate-registration-token)]
                t1 =not=> t2)))
 
-;; ============================================================
 ;; hash-password
-;; ============================================================
 
 (facts "about hash-password"
 
@@ -45,9 +41,7 @@
                    h2 (auth/hash-password "password123")]
                h1 =not=> h2)))
 
-;; ============================================================
 ;; verify-password
-;; ============================================================
 
 (facts "about verify-password"
 

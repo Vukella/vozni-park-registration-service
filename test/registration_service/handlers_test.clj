@@ -5,9 +5,7 @@
             [registration-service.mail     :as mail]
             [registration-service.auth     :as auth]))
 
-;; ============================================================
 ;; Helper — build a Ring request with a JSON body
-;; ============================================================
 
 (defn- body-request
   "Builds a minimal Ring request map with a parsed JSON body (keyword keys).
@@ -21,9 +19,7 @@
   [params-map]
   {:query-params params-map})
 
-;; ============================================================
 ;; health-check
-;; ============================================================
 
 (facts "about health-check"
 
@@ -33,9 +29,7 @@
        (fact "body contains status UP"
              (get-in (handlers/health-check {}) [:body :status]) => "UP"))
 
-;; ============================================================
 ;; register-request
-;; ============================================================
 
 (facts "about register-request"
 
@@ -55,7 +49,6 @@
                (auth/generate-registration-token)
                => "mock-uuid-token-1234"
 
-               ;; Correct order: token, email, zaposleni-id, expires-at
                (db/save-registration-token! "mock-uuid-token-1234" "ana.jovanovic@voznipark.rs" 7 anything)
                => nil
 
@@ -68,9 +61,7 @@
              (provided
                (db/find-employee-by-email "unknown@voznipark.rs") => nil)))
 
-;; ============================================================
 ;; verify-token
-;; ============================================================
 
 (facts "about verify-token"
 
@@ -113,9 +104,7 @@
              (provided
                (db/find-valid-token "bad-token") => nil)))
 
-;; ============================================================
 ;; complete-registration
-;; ============================================================
 
 (facts "about complete-registration"
 
@@ -174,7 +163,6 @@
 
                (auth/hash-password "validpass1") => "$2a$10$mockedBCryptHash"
 
-               ;; Correct signature: username, full-name, password-hash, role-id, zaposleni-id
                (db/create-user! "pera.peric" "Pera Peric" "$2a$10$mockedBCryptHash" 2 3) => nil
 
                (db/mark-token-used! "good-token") => nil))
