@@ -445,3 +445,19 @@ The current implementation is suitable for an academic project and local demonst
 - Add integration tests that run against a disposable MySQL container.
 - Make the default assigned role configurable instead of hardcoding `ROLE_ID=2`.
 - Add token cleanup for expired and used registration tokens.
+
+## AI Usage Disclosure
+
+During the development of this project, AI tools were used as supporting, learning and clarification tools.
+
+AI assistance was used in the following areas:
+
+* understanding selected Clojure concepts and idioms while learning the language;
+* clarifying parts of the Clojure, Ring/Reitit, Midje, Docker, and CI/CD workflow when official documentation or error messages were not clear enough;
+* discussing possible causes of runtime, test, Docker, or CI/CD errors during debugging;
+* improving the wording, structure, and clarity of this README documentation.
+
+The implementation, project structure, architectural decisions, database integration, API behavior, tests, Docker configuration, and CI/CD setup were developed and adapted by me for this project.
+
+AI was not used to copy an external project or to submit a ready-made solution. It was used as a learning and support tool, while the final code, configuration, testing decisions, and project integration were reviewed, adjusted, and completed by me.
+
