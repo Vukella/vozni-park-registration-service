@@ -44,7 +44,7 @@
              => (contains {:status 200})
              (provided
                (db/find-employee-by-email "ana.jovanovic@voznipark.rs")
-               => {:id_zaposleni 7 :full_name "Ana Jovanovic" :email "ana.jovanovic@voznipark.rs"}
+               => {:id_employee 7 :full_name "Ana Jovanovic" :email "ana.jovanovic@voznipark.rs"}
 
                (auth/generate-registration-token)
                => "mock-uuid-token-1234"
@@ -144,7 +144,7 @@
              => 409
              (provided
                (db/find-valid-token "good-token")
-               => {:token "good-token" :email "pera@voznipark.rs" :zaposleni_id 3}
+               => {:token "good-token" :email "pera@voznipark.rs" :employee_id 3}
 
                (db/username-exists? "taken.user") => true))
 
@@ -154,12 +154,12 @@
              => (contains {:status 201})
              (provided
                (db/find-valid-token "good-token")
-               => {:token "good-token" :email "pera@voznipark.rs" :zaposleni_id 3}
+               => {:token "good-token" :email "pera@voznipark.rs" :employee_id 3}
 
                (db/username-exists? "pera.peric") => false
 
-               (db/find-employee-by-zaposleni-id 3)
-               => {:id_zaposleni 3 :full_name "Pera Peric" :email "pera@voznipark.rs"}
+               (db/find-employee-by-id 3)
+               => {:id_employee 3 :full_name "Pera Peric" :email "pera@voznipark.rs"}
 
                (auth/hash-password "validpass1") => "$2a$10$mockedBCryptHash"
 
@@ -174,12 +174,12 @@
              => "pera.peric"
              (provided
                (db/find-valid-token "good-token")
-               => {:token "good-token" :email "pera@voznipark.rs" :zaposleni_id 3}
+               => {:token "good-token" :email "pera@voznipark.rs" :employee_id 3}
 
                (db/username-exists? "pera.peric") => false
 
-               (db/find-employee-by-zaposleni-id 3)
-               => {:id_zaposleni 3 :full_name "Pera Peric" :email "pera@voznipark.rs"}
+               (db/find-employee-by-id 3)
+               => {:id_employee 3 :full_name "Pera Peric" :email "pera@voznipark.rs"}
 
                (auth/hash-password "validpass1") => "$2a$10$mockedBCryptHash"
 

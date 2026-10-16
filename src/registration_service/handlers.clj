@@ -18,11 +18,11 @@
         (let [employee (db/find-employee-by-email email)]
           (when employee
             (let [token        (auth/generate-registration-token)
-                  zaposleni-id (:id_zaposleni employee)
+                  employee-id (:id_employee employee)
                   expires-at   (java.sql.Timestamp.
                                  (+ (System/currentTimeMillis)
                                     (* 2 60 60 1000)))]
-              (db/save-registration-token! token email zaposleni-id expires-at)
+                 (db/save-registration-token! token email employee-id expires-at)
               (mail/send-registration-email email (:full_name employee) token))))
         {:status 200
          :body {:message "If this email is registered in our system, you will receive a registration link."}}))))
@@ -63,11 +63,11 @@
           {:status 409 :body {:error "Username is already taken."}}
 
           :else
-          (let [zaposleni-id  (:zaposleni_id record)
-                employee      (db/find-employee-by-zaposleni-id zaposleni-id)
+          (let [employee-id   (:employee_id record)
+                employee      (db/find-employee-by-id employee-id)
                 full-name     (:full_name employee)
                 password-hash (auth/hash-password password)]
-            (db/create-user! username full-name password-hash 2 zaposleni-id)
+             (db/create-user! username full-name password-hash 2 employee-id)
             (db/mark-token-used! token)
             (log/info (str "User account created: " username))
             {:status 201
