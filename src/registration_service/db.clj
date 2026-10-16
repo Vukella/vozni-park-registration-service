@@ -25,19 +25,19 @@
 
 (defn find-employee-by-email [email]
       (jdbc/execute-one! (get-datasource)
-                         ["SELECT * FROM zaposleni WHERE EMAIL = ? AND IS_ACTIVE = 1" email]
+                         ["SELECT * FROM employee WHERE EMAIL = ? AND IS_ACTIVE = 1" email]
                          query-opts))
 
-(defn find-employee-by-zaposleni-id [id]
+(defn find-employee-by-id [id]
       (jdbc/execute-one! (get-datasource)
-                         ["SELECT * FROM zaposleni WHERE ID_ZAPOSLENI = ?" id]
+                         ["SELECT * FROM employee WHERE ID_EMPLOYEE = ?" id]
                          query-opts))
 
 ;; Registration Token Queries
 
 (defn save-registration-token! [token email zaposleni-id expires-at]
       (jdbc/execute-one! (get-datasource)
-                         ["INSERT INTO registration_tokens (TOKEN, EMAIL, ZAPOSLENI_ID, EXPIRES_AT)
+                         ["INSERT INTO registration_tokens (TOKEN, EMAIL, EMPLOYEE_ID, EXPIRES_AT)
                        VALUES (?, ?, ?, ?)"
                           token email zaposleni-id expires-at]
                          query-opts))
@@ -58,7 +58,7 @@
 
 (defn create-user! [username full-name password-hash role-id zaposleni-id]
   (jdbc/execute-one! (get-datasource)
-                     ["INSERT INTO app_user (USERNAME, FULL_NAME, PASSWORD_HASH, ROLE_ID, ZAPOSLENI_ID, IS_ACTIVE, SKIP_NEXT_OTP)
+                     ["INSERT INTO app_user (USERNAME, FULL_NAME, PASSWORD_HASH, ROLE_ID, EMPLOYEE_ID, IS_ACTIVE, SKIP_NEXT_OTP)
                        VALUES (?, ?, ?, ?, ?, 1, 1)"
                       username full-name password-hash role-id zaposleni-id]
                      query-opts))
